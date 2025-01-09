@@ -43,7 +43,7 @@ const LinkItem = ({ icon: Icon, text }: { icon: React.ElementType; text: string 
 const CuratedLinks = () => {
   return (
     <div className="w-full max-w-7xl mx-auto px-4">
-      <h1 className="text-3xl font-bold mb-8 font-display">
+      <h1 className="scroll-m-20 text-4xl font-bold font-display tracking-tight lg:text-5xl mb-4">
         Discover Curated Links
       </h1>
       

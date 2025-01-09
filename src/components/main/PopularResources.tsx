@@ -50,7 +50,7 @@ const PopularResources = () => {
 
   return (
     <div className="w-full max-w-7xl p-4 space-y-6">
-      <h2 className="text-3xl font-bold font-display mb-8">Popular Resources</h2>
+      <h2 className="scroll-m-20 text-4xl font-bold font-display tracking-tight lg:text-5xl mb-4">Popular Resources</h2>
       
       {/* Time filter tabs */}
       <div className="flex flex-wrap gap-2">

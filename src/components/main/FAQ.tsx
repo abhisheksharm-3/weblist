@@ -5,6 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 const FAQSection = () => {
   const faqs = [
@@ -31,25 +32,26 @@ const FAQSection = () => {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div className="container max-w-4xl mx-auto p-4">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Frequently Asked Questions</h1>
-        <p className="text-zinc-400">
+        <h1 className="scroll-m-20 text-4xl font-bold font-display tracking-tight lg:text-5xl mb-4">
+          Frequently Asked Questions
+        </h1>
+        <p className="text-muted-foreground">
           Find answers to common questions about LinkVault
         </p>
       </div>
 
-      <Accordion type="single" collapsible className="space-y-4">
+      <Accordion type="single" collapsible className="w-full">
         {faqs.map((faq, index) => (
           <AccordionItem 
             key={index} 
             value={`item-${index}`}
-            className="bg-zinc-900 rounded-lg border border-zinc-800"
           >
-            <AccordionTrigger className="px-4 py-4 text-white hover:no-underline">
+            <AccordionTrigger className="text-base">
               {faq.question}
             </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 text-zinc-400">
+            <AccordionContent className="text-muted-foreground">
               {faq.answer}
             </AccordionContent>
           </AccordionItem>
@@ -57,10 +59,10 @@ const FAQSection = () => {
       </Accordion>
 
       <div className="text-center mt-8">
-        <p className="text-zinc-400 mb-4">Still have questions?</p>
-        <button className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition-colors">
+        <p className="text-muted-foreground mb-4">Still have questions?</p>
+        <Button size="lg">
           Contact Support
-        </button>
+        </Button>
       </div>
     </div>
   );

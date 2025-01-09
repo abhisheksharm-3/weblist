@@ -71,7 +71,7 @@ const SearchResources = () => {
 
   return (
     <div className="w-full max-w-7xl p-4 space-y-6">
-      <h2 className="text-3xl font-bold font-display mb-8">Search Resources</h2>
+      <h2 className="scroll-m-20 text-4xl font-bold font-display tracking-tight lg:text-5xl mb-4">Search Resources</h2>
       
       {/* Search input */}
       <div className="relative">

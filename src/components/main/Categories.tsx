@@ -68,7 +68,7 @@ const BrowseCategories = () => {
 
   return (
     <div className="w-full max-w-7xl p-4">
-      <h2 className="text-3xl font-bold mb-8 font-display">Browse Categories</h2>
+      <h2 className="scroll-m-20 text-4xl font-bold font-display tracking-tight lg:text-5xl mb-4">Browse Categories</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category, index) => (

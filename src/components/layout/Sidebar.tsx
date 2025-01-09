@@ -28,17 +28,17 @@ import { useState, useEffect } from "react"
 
 const navigationItems = [
   {
-    title: "Overview",
+    title: "Home",
     url: "#",
     icon: Home,
   },
   {
-    title: "Workspace",
+    title: "Categories",
     url: "#",
     icon: Layout,
   },
   {
-    title: "Analytics",
+    title: "Popular",
     url: "#",
     icon: TrendingUp,
   },

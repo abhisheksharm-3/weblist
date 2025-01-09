@@ -1,5 +1,6 @@
 import PrivacyPolicy from "@/components/compliance/PrivacyPolicy";
 import ResourceSubmissionForm from "@/components/forms/ResourceSubmissionForm";
+import Layout from "@/components/layout/Layout";
 import AboutPage from "@/components/main/AboutPage";
 import BrowseCategories from "@/components/main/Categories";
 import CuratedLinks from "@/components/main/CuratedLinks";
@@ -12,7 +13,7 @@ import React from "react";
 
 const Home = () => {
   return (
-    <div>
+    <Layout className="">
       <CuratedLinks />
       <RecentAdditions />
       <Stats />
@@ -23,7 +24,7 @@ const Home = () => {
       <AboutPage />
       <FAQSection />
       <PrivacyPolicy />
-    </div>
+    </Layout>
   );
 };
 

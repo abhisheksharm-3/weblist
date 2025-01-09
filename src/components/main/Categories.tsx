@@ -68,37 +68,34 @@ const BrowseCategories = () => {
 
   return (
     <div className="w-full max-w-7xl p-4">
-      <h2 className="text-2xl font-bold text-white mb-6">Browse Categories</h2>
+      <h2 className="text-3xl font-bold mb-8 font-display">Browse Categories</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category, index) => (
-          <Card 
-            key={index} 
-            className="bg-zinc-900/50 border-zinc-800 hover:bg-zinc-800/50 transition-colors"
-          >
-            <CardHeader>
-              <div className="flex items-center gap-2 mb-2">
-                <category.icon className="w-5 h-5 text-blue-400" />
-                <h3 className="text-white text-lg font-medium">{category.title}</h3>
-              </div>
-              <p className="text-zinc-400 text-sm">{category.description}</p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {category.subcategories.map((sub, subIndex) => (
-                  <div 
-                    key={subIndex} 
-                    className="flex justify-between items-center"
-                  >
-                    <span className="text-white">{sub.name}</span>
-                    <span className="text-zinc-500 bg-zinc-800/50 px-2 py-1 rounded text-sm">
-                      {sub.links} links
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <Card key={index}>
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <category.icon className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-medium">{category.title}</h3>
+            </div>
+            <p className="text-muted-foreground text-sm">{category.description}</p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {category.subcategories.map((sub, subIndex) => (
+                <div 
+                  key={subIndex} 
+                  className="flex justify-between items-center"
+                >
+                  <span>{sub.name}</span>
+                  <span className="text-muted-foreground bg-secondary px-2 py-1 rounded text-sm">
+                    {sub.links} links
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
         ))}
       </div>
     </div>

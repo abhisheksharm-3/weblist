@@ -1,212 +1,226 @@
 "use client"
-import React, { ChangeEvent, FormEvent, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { FormEvent, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Check } from 'lucide-react';
 
 interface FormData {
-    url: string;
-    title: string;
-    description: string;
-    category: string;
-    tags: string;
-    resourceType: string;
+  url: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string;
+  resourceType: string;
 }
 
-interface FormErrors {
-    [key: string]: string;
-}
+type FormErrors = Partial<Record<keyof FormData, string>>;
+
+const RESOURCE_TYPES = ['Article', 'Tutorial', 'Tool', 'Course'] as const;
+
+const CATEGORIES = [
+  { value: 'development', label: 'Development' },
+  { value: 'design', label: 'Design' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'business', label: 'Business' },
+] as const;
 
 const ResourceSubmissionForm = () => {
-    const [formData, setFormData] = useState<FormData>({
-        url: '',
-        title: '',
-        description: '',
-        category: '',
-        tags: '',
-        resourceType: ''
-    });
+  const [formData, setFormData] = useState<FormData>({
+    url: '',
+    title: '',
+    description: '',
+    category: '',
+    tags: '',
+    resourceType: ''
+  });
 
-    const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
-    const validateForm = (): FormErrors => {
-        const newErrors: FormErrors = {};
-        if (!formData.url) newErrors.url = 'Resource URL is required';
-        if (!formData.title) newErrors.title = 'Title is required';
-        if (!formData.description) newErrors.description = 'Description is required';
-        if (!formData.category) newErrors.category = 'Category is required';
-        if (!formData.resourceType) newErrors.resourceType = 'Resource type is required';
+  const validateForm = (): FormErrors => {
+    const newErrors: FormErrors = {};
+    if (!formData.url) newErrors.url = 'Resource URL is required';
+    if (!formData.title) newErrors.title = 'Title is required';
+    if (!formData.description) newErrors.description = 'Description is required';
+    if (!formData.category) newErrors.category = 'Category is required';
+    if (!formData.resourceType) newErrors.resourceType = 'Resource type is required';
+    return newErrors;
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const newErrors = validateForm();
+    if (Object.keys(newErrors).length === 0) {
+      console.log('Form submitted:', formData);
+    } else {
+      setErrors(newErrors);
+    }
+  };
+
+  const clearError = (field: keyof FormData) => {
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
         return newErrors;
-    };
+      });
+    }
+  };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const newErrors = validateForm();
-        if (Object.keys(newErrors).length === 0) {
-            // Handle form submission
-            console.log('Form submitted:', formData);
-        } else {
-            setErrors(newErrors);
-        }
-    };
-
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
-    };
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    clearError(field);
+  };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <Card className="bg-zinc-900 text-white">
-        <CardContent className="pt-6">
-          <h1 className="text-2xl font-bold mb-2">Submit a Resource</h1>
-          <p className="text-zinc-400 mb-6">
+    <div className="max-w-5xl mx-auto p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className='text-3xl font-bold font-display'>Submit a Resource</CardTitle>
+          <CardDescription>
             Share valuable resources with the community. All submissions are reviewed before being published.
-          </p>
-
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block mb-2">
-                Resource URL <span className="text-red-500">*</span>
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="url">
+                Resource URL <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="url"
                 type="url"
-                name="url"
                 placeholder="https://"
-                className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 focus:border-blue-500 focus:outline-none"
                 value={formData.url}
-                onChange={handleInputChange}
+                onChange={e => handleInputChange('url', e.target.value)}
               />
-              {errors.url && <p className="text-red-500 mt-1 text-sm">{errors.url}</p>}
+              {errors.url && (
+                <p className="text-sm text-destructive">{errors.url}</p>
+              )}
             </div>
 
-            <div>
-              <label className="block mb-2">
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="title"
+            <div className="space-y-2">
+              <Label htmlFor="title">
+                Title <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="title"
                 placeholder="Give your resource a descriptive title"
-                className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 focus:border-blue-500 focus:outline-none"
                 value={formData.title}
-                onChange={handleInputChange}
+                onChange={e => handleInputChange('title', e.target.value)}
               />
-              {errors.title && <p className="text-red-500 mt-1 text-sm">{errors.title}</p>}
+              {errors.title && (
+                <p className="text-sm text-destructive">{errors.title}</p>
+              )}
             </div>
 
-            <div>
-              <label className="block mb-2">
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="description"
+            <div className="space-y-2">
+              <Label htmlFor="description">
+                Description <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="description"
                 placeholder="Describe what makes this resource valuable..."
                 rows={4}
-                className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 focus:border-blue-500 focus:outline-none"
                 value={formData.description}
-                onChange={handleInputChange}
+                onChange={e => handleInputChange('description', e.target.value)}
               />
-              {errors.description && <p className="text-red-500 mt-1 text-sm">{errors.description}</p>}
+              {errors.description && (
+                <p className="text-sm text-destructive">{errors.description}</p>
+              )}
             </div>
 
-            <div>
-              <label className="block mb-2">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="category"
-                className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 focus:border-blue-500 focus:outline-none"
+            <div className="space-y-2">
+              <Label htmlFor="category">
+                Category <span className="text-destructive">*</span>
+              </Label>
+              <Select
                 value={formData.category}
-                onChange={handleInputChange}
+                onValueChange={value => handleInputChange('category', value)}
               >
-                <option value="">Select a category</option>
-                <option value="development">Development</option>
-                <option value="design">Design</option>
-                <option value="marketing">Marketing</option>
-                <option value="business">Business</option>
-              </select>
-              {errors.category && <p className="text-red-500 mt-1 text-sm">{errors.category}</p>}
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map(category => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.category && (
+                <p className="text-sm text-destructive">{errors.category}</p>
+              )}
             </div>
 
-            <div>
-              <label className="block mb-2">Tags</label>
-              <input
-                type="text"
-                name="tags"
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags</Label>
+              <Input
+                id="tags"
                 placeholder="Add tags (comma separated)"
-                className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 focus:border-blue-500 focus:outline-none"
                 value={formData.tags}
-                onChange={handleInputChange}
+                onChange={e => handleInputChange('tags', e.target.value)}
               />
             </div>
 
-            <div>
-              <label className="block mb-2">
-                Resource Type <span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-4">
-                {['Article', 'Tutorial', 'Tool', 'Course'].map((type) => (
-                  <button
+            <div className="space-y-2">
+              <Label>
+                Resource Type <span className="text-destructive">*</span>
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {RESOURCE_TYPES.map((type) => (
+                  <Button
                     key={type}
                     type="button"
-                    className={`px-4 py-2 rounded border ${
-                      formData.resourceType === type
-                        ? 'bg-blue-600 border-blue-500'
-                        : 'bg-zinc-800 border-zinc-700 hover:border-zinc-600'
-                    }`}
-                    onClick={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        resourceType: type
-                      }));
-                      if (errors.resourceType) {
-                        setErrors(prev => ({
-                          ...prev,
-                          resourceType: ''
-                        }));
-                      }
-                    }}
+                    variant={formData.resourceType === type ? "default" : "outline"}
+                    onClick={() => handleInputChange('resourceType', type)}
                   >
                     {type}
-                  </button>
+                  </Button>
                 ))}
               </div>
-              {errors.resourceType && <p className="text-red-500 mt-1 text-sm">{errors.resourceType}</p>}
+              {errors.resourceType && (
+                <p className="text-sm text-destructive">{errors.resourceType}</p>
+              )}
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded font-medium transition-colors"
-            >
+            <Button type="submit" className="w-full">
               Submit Resource
-            </button>
+            </Button>
           </form>
 
-          <div className="mt-8 p-4 bg-zinc-800 rounded">
-            <h2 className="text-lg font-semibold mb-3">Submission Guidelines</h2>
-            <ul className="space-y-2">
-              {[
-                'Ensure the resource is high-quality and provides value to the community',
-                'Check if the resource hasn\'t been submitted before',
-                'Provide accurate and detailed description',
-                'Select the most appropriate category and tags'
-              ].map((guideline, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span className="text-zinc-400">{guideline}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Alert className="mt-8">
+            <CardTitle className="mb-3 text-lg">Submission Guidelines</CardTitle>
+            <AlertDescription>
+              <ul className="space-y-2">
+                {[
+                  'Ensure the resource is high-quality and provides value to the community',
+                  'Check if the resource hasn\'t been submitted before',
+                  'Provide accurate and detailed description',
+                  'Select the most appropriate category and tags'
+                ].map((guideline, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-1" />
+                    <span className="text-muted-foreground">{guideline}</span>
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     </div>

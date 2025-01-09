@@ -4,9 +4,9 @@ import { Shield, User, Activity, Lock, FileText, Mail } from 'lucide-react';
 
 const PrivacyPolicy = () => {
   return (
-    <div className="max-w-3xl mx-auto p-4 text-white">
+    <div className="max-w-5xl mx-auto p-4 text-white">
       <h1 className="text-2xl font-bold mb-2">Privacy Policy</h1>
-      <p className="text-zinc-400 mb-8">Last updated: January 2024</p>
+      <p className="text-zinc-400 mb-8">Last updated: January 2025</p>
 
       <div className="space-y-6">
         <Card className="bg-zinc-900">
@@ -115,7 +115,7 @@ const PrivacyPolicy = () => {
         </Card>
 
         <p className="text-sm text-zinc-500 text-center mt-8">
-          This privacy policy was last updated on January 5, 2024. We may update this policy from time to time.
+          This privacy policy was last updated on January 5, 2025. We may update this policy from time to time.
         </p>
       </div>
     </div>

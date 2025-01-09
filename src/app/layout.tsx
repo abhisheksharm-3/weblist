@@ -6,8 +6,6 @@ import {
   Space_Grotesk,
 } from "next/font/google";
 import "./globals.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AppSidebar from "@/components/layout/Sidebar";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 const geistSans = Geist({
@@ -53,13 +51,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <AppSidebar />
-            <main>
-              <SidebarTrigger />
-              {children}
-            </main>
-          </SidebarProvider>
+          {children}
         </NextThemesProvider>
       </body>
     </html>

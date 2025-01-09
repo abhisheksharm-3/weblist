@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 const MetricCards = () => {
   const metrics = [
@@ -18,15 +19,17 @@ const MetricCards = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl w-full p-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-7xl w-full p-4">
       {metrics.map((metric, index) => (
         <Card 
           key={index} 
-          className="bg-zinc-900/50 border-zinc-800"
+          className={cn(
+            "border-border bg-card/50"
+          )}
         >
           <CardContent className="p-6 text-center">
-            <h3 className="text-white text-lg mb-2">{metric.title}</h3>
-            <p className="text-blue-400 text-4xl font-semibold">
+            <h3 className="text-foreground text-lg mb-2">{metric.title}</h3>
+            <p className="text-primary text-4xl font-semibold">
               {metric.value}
             </p>
           </CardContent>

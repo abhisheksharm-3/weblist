@@ -4,11 +4,37 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, MoreVertical } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+interface Filter {
+  id: string;
+  label: string;
+}
+
+interface Category {
+  name: string;
+  variant: "default" | "secondary" | "destructive" | "outline";
+}
+
+interface SearchResult {
+  category: Category;
+  timeAgo: string;
+  title: string;
+  description: string;
+  relevance: string;
+  saves: number;
+}
 
 const SearchResources = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
   
-  const filters = [
+  const filters: Filter[] = [
     { id: 'all', label: 'All Results' },
     { id: 'development', label: 'Development' },
     { id: 'design', label: 'Design' },
@@ -16,9 +42,9 @@ const SearchResources = () => {
     { id: 'productivity', label: 'Productivity' }
   ];
 
-  const searchResults = [
+  const searchResults: SearchResult[] = [
     {
-      category: { name: 'Development', color: 'text-blue-400' },
+      category: { name: 'Development', variant: 'default' },
       timeAgo: 'Added 2 days ago',
       title: 'Advanced React Patterns and Best Practices',
       description: 'In-depth guide to React design patterns, performance optimization, and component architecture.',
@@ -26,7 +52,7 @@ const SearchResources = () => {
       saves: 234
     },
     {
-      category: { name: 'Design', color: 'text-purple-400' },
+      category: { name: 'Design', variant: 'secondary' },
       timeAgo: 'Added 1 week ago',
       title: 'UI Design System Components',
       description: 'Collection of reusable UI components and design tokens for modern web applications.',
@@ -34,7 +60,7 @@ const SearchResources = () => {
       saves: 189
     },
     {
-      category: { name: 'Tools', color: 'text-green-400' },
+      category: { name: 'Tools', variant: 'outline' },
       timeAgo: 'Added 3 days ago',
       title: 'Developer Productivity Tools 2024',
       description: 'Essential tools and extensions to boost your development workflow and efficiency.',
@@ -44,29 +70,25 @@ const SearchResources = () => {
   ];
 
   return (
-    <div className="w-full max-w-4xl p-4">
-      <h2 className="text-2xl font-bold text-white mb-6">Search Resources</h2>
+    <div className="w-full max-w-7xl p-4 space-y-6">
+      <h2 className="text-3xl font-bold font-display mb-8">Search Resources</h2>
       
       {/* Search input */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input 
           placeholder="Search for links, categories, or topics..."
-          className="w-full bg-zinc-900/50 border-zinc-800 pl-10 py-6 text-white placeholder:text-zinc-400"
+          className="pl-10 h-12"
         />
       </div>
 
       {/* Filter tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2">
         {filters.map((filter) => (
           <Button
             key={filter.id}
-            variant="ghost"
-            className={`${
-              activeFilter === filter.id
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-400 hover:text-white'
-            } rounded-md px-4 py-2`}
+            variant={activeFilter === filter.id ? "secondary" : "ghost"}
+            size="sm"
             onClick={() => setActiveFilter(filter.id)}
           >
             {filter.label}
@@ -77,47 +99,51 @@ const SearchResources = () => {
       {/* Search results */}
       <div className="space-y-4">
         {searchResults.map((result, index) => (
-          <Card
-            key={index}
-            className="bg-zinc-900/50 border-zinc-800 hover:bg-zinc-800/50 transition-colors"
-          >
+          <Card key={index} className="transition-colors hover:bg-accent">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <span className={result.category.color}>
+                  <Badge variant={result.category.variant}>
                     {result.category.name}
-                  </span>
-                  <span className="text-zinc-500 text-sm">
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
                     {result.timeAgo}
                   </span>
                 </div>
-                <Button variant="ghost" size="icon" className="text-zinc-400">
-                  <MoreVertical className="w-5 h-5" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="w-4 h-4" />
+                      <span className="sr-only">More options</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Add to Collection</DropdownMenuItem>
+                    <DropdownMenuItem>Share Resource</DropdownMenuItem>
+                    <DropdownMenuItem>Report</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
-              <h3 className="text-white text-xl font-medium mb-2">
+              <h3 className="text-xl font-medium mb-2">
                 {result.title}
               </h3>
-              <p className="text-zinc-400 text-sm mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 {result.description}
               </p>
 
-              <div className="flex items-center gap-4 text-zinc-400 text-sm">
-                <span>relevance: {result.relevance}</span>
-                <span>•</span>
-                <span>saved by {result.saves} users</span>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span>Relevance: {result.relevance}</span>
+                <span className="w-1 h-1 rounded-full bg-muted-foreground" />
+                <span>Saved by {result.saves} users</span>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="flex justify-center mt-6">
-        <Button
-          variant="secondary"
-          className="bg-zinc-800 text-white hover:bg-zinc-700"
-        >
+      <div className="flex justify-center">
+        <Button variant="secondary">
           Load More Results
         </Button>
       </div>

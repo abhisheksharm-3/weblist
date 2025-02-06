@@ -6,7 +6,7 @@ import {
   Space_Grotesk,
 } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+import Providers from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,14 +45,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${jakarta.variable} ${spaceGrotesk.variable} antialiased`}
       >
-        <NextThemesProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </NextThemesProvider>
+        <Providers>
+        {children}
+        </Providers>
       </body>
     </html>
   );

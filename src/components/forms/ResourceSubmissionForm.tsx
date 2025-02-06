@@ -1,75 +1,171 @@
-"use client"
-import React, { FormEvent, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+"use client";
+import React, { FormEvent, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Check } from 'lucide-react';
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Check } from "lucide-react";
+import { ResourceType } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { submitFormData } from "@/lib/server/appwrite";
+import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
-interface FormData {
-  url: string;
-  title: string;
-  description: string;
-  category: string;
-  tags: string;
-  resourceType: string;
-}
+const RESOURCE_TYPES = ["Article", "Tutorial", "Tool", "Course"] as const;
 
-type FormErrors = Partial<Record<keyof FormData, string>>;
-
-const RESOURCE_TYPES = ['Article', 'Tutorial', 'Tool', 'Course'] as const;
+const resourceSchema = z.object({
+  resourceURL: z.string().url("Please enter a valid URL"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(100, "Title must be less than 100 characters"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(500, "Description must be less than 500 characters"),
+  category: z.enum(
+    ["Development", "Design", "Marketing", "Business"] as const,
+    {
+      required_error: "Category is required",
+    }
+  ),
+  tags: z.array(z.string()).default([]),
+  resourceType: z.enum(["Article", "Tutorial", "Tool", "Course"] as const, {
+    required_error: "Resource type is required",
+  }),
+});
 
 const CATEGORIES = [
-  { value: 'development', label: 'Development' },
-  { value: 'design', label: 'Design' },
-  { value: 'marketing', label: 'Marketing' },
-  { value: 'business', label: 'Business' },
+  { value: "Development", label: "Development" },
+  { value: "Design", label: "Design" },
+  { value: "Marketing", label: "Marketing" },
+  { value: "Business", label: "Business" },
 ] as const;
 
 const ResourceSubmissionForm = () => {
-  const [formData, setFormData] = useState<FormData>({
-    url: '',
-    title: '',
-    description: '',
-    category: '',
-    tags: '',
-    resourceType: ''
+  const { toast } = useToast();
+  const [formData, setFormData] = useState<
+    Omit<ResourceType, "id" | "approvedAt">
+  >({
+    resourceURL: "",
+    title: "",
+    description: "",
+    category: "",
+    tags: [],
+    resourceType: "",
   });
 
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ResourceType, string>>
+  >({});
 
-  const validateForm = (): FormErrors => {
-    const newErrors: FormErrors = {};
-    if (!formData.url) newErrors.url = 'Resource URL is required';
-    if (!formData.title) newErrors.title = 'Title is required';
-    if (!formData.description) newErrors.description = 'Description is required';
-    if (!formData.category) newErrors.category = 'Category is required';
-    if (!formData.resourceType) newErrors.resourceType = 'Resource type is required';
-    return newErrors;
+  const mutation = useMutation({
+    mutationFn: async (data: Omit<ResourceType, "id" | "approvedAt">) => {
+      const fullData: ResourceType = {
+        ...data,
+        id: uuidv4(),
+        approvedAt: "", // Empty string as it's not approved yet
+        tags: data.tags.length > 0 ? data.tags : [],
+      };
+      return await submitFormData(fullData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Your resource has been submitted for review.",
+      });
+      setFormData({
+        resourceURL: "",
+        title: "",
+        description: "",
+        category: "",
+        tags: [],
+        resourceType: "",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to submit resource. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Submission error:", error);
+    },
+  });
+
+  const validateForm = () => {
+    try {
+      resourceSchema.parse(formData);
+      return {};
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Partial<Record<keyof ResourceType, string>> = {};
+        error.errors.forEach((err) => {
+          if (err.path) {
+            errors[err.path[0] as keyof ResourceType] = err.message;
+          }
+        });
+        return errors;
+      }
+      return {};
+    }
   };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors = validateForm();
+
     if (Object.keys(newErrors).length === 0) {
-      console.log('Form submitted:', formData);
+      const processedData = {
+        ...formData,
+        tags: Array.isArray(formData.tags)
+          ? formData.tags
+          : (formData.tags as string)
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean),
+      };
+
+      try {
+        // Parse one final time to ensure type safety
+        const validatedData = resourceSchema.parse(processedData);
+        mutation.mutate(validatedData);
+      } catch (error) {
+        console.error("Validation error:", error);
+        if (error instanceof z.ZodError) {
+          setErrors(
+            error.errors.reduce((acc, curr) => {
+              if (curr.path[0]) {
+                acc[curr.path[0] as keyof ResourceType] = curr.message;
+              }
+              return acc;
+            }, {} as Partial<Record<keyof ResourceType, string>>)
+          );
+        }
+      }
     } else {
       setErrors(newErrors);
     }
   };
 
-  const clearError = (field: keyof FormData) => {
+  const clearError = (field: keyof typeof formData) => {
     if (errors[field]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
@@ -77,10 +173,11 @@ const ResourceSubmissionForm = () => {
     }
   };
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]:
+        field === "tags" ? value.split(",").map((tag) => tag.trim()) : value,
     }));
     clearError(field);
   };
@@ -89,9 +186,12 @@ const ResourceSubmissionForm = () => {
     <div className="max-w-5xl mx-auto p-4">
       <Card>
         <CardHeader>
-          <CardTitle className='text-3xl font-bold font-display'>Submit a Resource</CardTitle>
+          <CardTitle className="text-3xl font-bold font-display">
+            Submit a Resource
+          </CardTitle>
           <CardDescription>
-            Share valuable resources with the community. All submissions are reviewed before being published.
+            Share valuable resources with the community. All submissions are
+            reviewed before being published.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -104,11 +204,13 @@ const ResourceSubmissionForm = () => {
                 id="url"
                 type="url"
                 placeholder="https://"
-                value={formData.url}
-                onChange={e => handleInputChange('url', e.target.value)}
+                value={formData.resourceURL}
+                onChange={(e) =>
+                  handleInputChange("resourceURL", e.target.value)
+                }
               />
-              {errors.url && (
-                <p className="text-sm text-destructive">{errors.url}</p>
+              {errors.resourceURL && (
+                <p className="text-sm text-destructive">{errors.resourceURL}</p>
               )}
             </div>
 
@@ -120,7 +222,7 @@ const ResourceSubmissionForm = () => {
                 id="title"
                 placeholder="Give your resource a descriptive title"
                 value={formData.title}
-                onChange={e => handleInputChange('title', e.target.value)}
+                onChange={(e) => handleInputChange("title", e.target.value)}
               />
               {errors.title && (
                 <p className="text-sm text-destructive">{errors.title}</p>
@@ -136,7 +238,9 @@ const ResourceSubmissionForm = () => {
                 placeholder="Describe what makes this resource valuable..."
                 rows={4}
                 value={formData.description}
-                onChange={e => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
               />
               {errors.description && (
                 <p className="text-sm text-destructive">{errors.description}</p>
@@ -149,13 +253,13 @@ const ResourceSubmissionForm = () => {
               </Label>
               <Select
                 value={formData.category}
-                onValueChange={value => handleInputChange('category', value)}
+                onValueChange={(value) => handleInputChange("category", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map(category => (
+                  {CATEGORIES.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
                     </SelectItem>
@@ -173,7 +277,7 @@ const ResourceSubmissionForm = () => {
                 id="tags"
                 placeholder="Add tags (comma separated)"
                 value={formData.tags}
-                onChange={e => handleInputChange('tags', e.target.value)}
+                onChange={(e) => handleInputChange("tags", e.target.value)}
               />
             </div>
 
@@ -186,15 +290,19 @@ const ResourceSubmissionForm = () => {
                   <Button
                     key={type}
                     type="button"
-                    variant={formData.resourceType === type ? "default" : "outline"}
-                    onClick={() => handleInputChange('resourceType', type)}
+                    variant={
+                      formData.resourceType === type ? "default" : "outline"
+                    }
+                    onClick={() => handleInputChange("resourceType", type)}
                   >
                     {type}
                   </Button>
                 ))}
               </div>
               {errors.resourceType && (
-                <p className="text-sm text-destructive">{errors.resourceType}</p>
+                <p className="text-sm text-destructive">
+                  {errors.resourceType}
+                </p>
               )}
             </div>
 
@@ -204,14 +312,16 @@ const ResourceSubmissionForm = () => {
           </form>
 
           <Alert className="mt-8">
-            <CardTitle className="mb-3 text-lg">Submission Guidelines</CardTitle>
+            <CardTitle className="mb-3 text-lg">
+              Submission Guidelines
+            </CardTitle>
             <AlertDescription>
               <ul className="space-y-2">
                 {[
-                  'Ensure the resource is high-quality and provides value to the community',
-                  'Check if the resource hasn\'t been submitted before',
-                  'Provide accurate and detailed description',
-                  'Select the most appropriate category and tags'
+                  "Ensure the resource is high-quality and provides value to the community",
+                  "Check if the resource hasn't been submitted before",
+                  "Provide accurate and detailed description",
+                  "Select the most appropriate category and tags",
                 ].map((guideline, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-1" />

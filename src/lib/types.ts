@@ -6,5 +6,5 @@ export type ResourceType = {
     category: string;
     tags: string[];
     resourceType: string;
-    approvedAt: string;
+    approved: boolean;
     };

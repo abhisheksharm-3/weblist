@@ -61,7 +61,7 @@ const CATEGORIES = [
 const ResourceSubmissionForm = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<
-    Omit<ResourceType, "id" | "approvedAt">
+    Omit<ResourceType, "id" | "approved">
   >({
     resourceURL: "",
     title: "",
@@ -76,11 +76,11 @@ const ResourceSubmissionForm = () => {
   >({});
 
   const mutation = useMutation({
-    mutationFn: async (data: Omit<ResourceType, "id" | "approvedAt">) => {
+    mutationFn: async (data: Omit<ResourceType, "id" | "approved">) => {
       const fullData: ResourceType = {
         ...data,
         id: uuidv4(),
-        approvedAt: "", // Empty string as it's not approved yet
+        approved: false,
         tags: data.tags.length > 0 ? data.tags : [],
       };
       return await submitFormData(fullData);

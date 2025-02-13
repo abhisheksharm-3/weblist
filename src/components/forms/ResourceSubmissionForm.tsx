@@ -43,7 +43,7 @@ const resourceSchema = z.object({
     ["Development", "Design", "Marketing", "Business"] as const,
     {
       required_error: "Category is required",
-    }
+    },
   ),
   tags: z.array(z.string()).default([]),
   resourceType: z.enum(["Article", "Tutorial", "Tool", "Course"] as const, {
@@ -149,12 +149,15 @@ const ResourceSubmissionForm = () => {
         console.error("Validation error:", error);
         if (error instanceof z.ZodError) {
           setErrors(
-            error.errors.reduce((acc, curr) => {
-              if (curr.path[0]) {
-                acc[curr.path[0] as keyof ResourceType] = curr.message;
-              }
-              return acc;
-            }, {} as Partial<Record<keyof ResourceType, string>>)
+            error.errors.reduce(
+              (acc, curr) => {
+                if (curr.path[0]) {
+                  acc[curr.path[0] as keyof ResourceType] = curr.message;
+                }
+                return acc;
+              },
+              {} as Partial<Record<keyof ResourceType, string>>,
+            ),
           );
         }
       }
@@ -322,8 +325,11 @@ const ResourceSubmissionForm = () => {
                   "Check if the resource hasn't been submitted before",
                   "Provide accurate and detailed description",
                   "Select the most appropriate category and tags",
-                ].map((guideline, index) => (
-                  <li key={index} className="flex items-start gap-2">
+                ].map((guideline) => (
+                  <li
+                    key={`guideline-${guideline.slice(0, 10)}`}
+                    className="flex items-start gap-2"
+                  >
                     <Check className="h-4 w-4 text-primary mt-1" />
                     <span className="text-muted-foreground">{guideline}</span>
                   </li>
